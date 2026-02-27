@@ -6,56 +6,40 @@ async function cargarListaPresets() {
     if (data.error) throw new Error(data.error);
 
     console.log("Presets recibidos:", data);
-    const lista = document.getElementById('mi-lista');
-    lista.innerHTML = "";
-
-    data.forEach(grupo => {
-      if (grupo.carpeta) {
-        // Crear un <li> para la carpeta
-        const carpetaLi = document.createElement('li');
-        carpetaLi.textContent = grupo.carpeta;
-        carpetaLi.style.fontWeight = "bold";
-
-        // Crear una sublista para los presets dentro de la carpeta
-        const subLista = document.createElement('ul');
-        grupo.contenido.forEach(file => {
-          const li = document.createElement('li');
-          li.textContent = file.archivo.replace('.json', '');
-          li.addEventListener("click", async () => {
-            try {
-              const r = await fetch(file.download_url);
-              const json = await r.json();
-              console.log("Preset cargado:", json);
-              aplicarPreset(json);
-            } catch (e) {
-              console.error("Error al descargar preset:", e);
-            }
-          });
-          subLista.appendChild(li);
-        });
-
-        carpetaLi.appendChild(subLista);
-        lista.appendChild(carpetaLi);
-      } else {
-        // Archivos sueltos en la raíz
-        const li = document.createElement('li');
-        li.textContent = grupo.archivo.replace('.json', '');
-        li.addEventListener("click", async () => {
-          try {
-            const r = await fetch(grupo.download_url);
-            const json = await r.json();
-            aplicarPreset(json);
-          } catch (e) {
-            console.error("Error al descargar preset:", e);
-          }
-        });
-        lista.appendChild(li);
-      }
-    });
+    renderPresets(data); // aquí usas tu función
   } catch (error) {
     console.error('Error al obtener archivos desde la API:', error);
   }
 }
+
+function renderPresets(data) {
+  const select = document.getElementById("mi-select");
+  select.innerHTML = "";
+
+  data.forEach(grupo => {
+    if (grupo.carpeta) {
+      const optgroup = document.createElement("optgroup");
+      optgroup.label = grupo.carpeta;
+
+      grupo.contenido.forEach(file => {
+        const option = document.createElement("option");
+        option.value = file.download_url;
+        option.textContent = file.archivo.replace(".json", "");
+        optgroup.appendChild(option);
+      });
+
+      select.appendChild(optgroup);
+    } else {
+      const option = document.createElement("option");
+      option.value = grupo.download_url;
+      option.textContent = grupo.archivo.replace(".json", "");
+      select.appendChild(option);
+    }
+  });
+}
+
+// Llamar al cargar la página
+cargarListaPresets();
 
 function aplicarPreset(data) {
   console.log("Style cargado:", data);

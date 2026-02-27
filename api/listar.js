@@ -1,30 +1,34 @@
+async function listarContenido(repo, path, token) {
+  const response = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Accept": "application/vnd.github.v3+json"
+    }
+  });
+  if (!response.ok) throw new Error("Error al listar contenido");
+  const data = await response.json();
+
+  const resultado = [];
+  for (const item of data) {
+    if (item.type === "dir") {
+      const subContenido = await listarContenido(repo, item.path, token);
+      resultado.push({ carpeta: item.name, contenido: subContenido });
+    } else if (item.name.endsWith(".json")) {
+      resultado.push({ archivo: item.name, download_url: item.download_url });
+    }
+  }
+  return resultado;
+}
+
 export default async function handler(req, res) {
   const TOKEN = process.env.GITHUB_TOKEN;
   const REPO = "DanMartinez-kz/AppMidi";
-  const FOLDER = "presets"; // Carpeta donde están los JSON
+  const FOLDER = "presets";
 
   try {
-    const response = await fetch(`https://api.github.com/repos/DanMartinez-kz/AppMidi/contents/${FOLDER}`, {
-      headers: {
-        "Authorization": `Bearer ${TOKEN}`,
-        "Accept": "application/vnd.github.v3+json"
-      }
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      return res.status(response.status).json(errorData);
-    }
-
-    const data = await response.json();
-    // Solo devolvemos los archivos .json
-   // const archivosJson = data.filter(file => file.name.endsWith('.json'));
-    const archivosJson = data.filter(file => {
-  return file.type === "dir" || file.name.endsWith(".json")});
-    res.status(200).json(archivosJson);
+    const resultado = await listarContenido(REPO, FOLDER, TOKEN);
+    res.status(200).json(resultado);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 }
-
-
