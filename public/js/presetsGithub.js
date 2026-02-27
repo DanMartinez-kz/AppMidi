@@ -1,46 +1,63 @@
+// Cambia la URL para que apunte a tu nueva API interna
+const urlLocal = 'https://api.github.com/repos/DanMartinez-kz/AppMidi/contents/presets/'; 
+
 async function cargarListaPresets() {
   try {
-    const response = await fetch('/api/listar');
-    const data = await response.json();
+    const response = await fetch('/api/listar'); // tu API interna
+    const archivos = await response.json();
 
-    if (data.error) throw new Error(data.error);
+    console.log("Respuesta completa:", archivos);
 
-    console.log("Presets recibidos:", data);
-    renderPresets(data); // aquí usas tu función
+    const select = document.getElementById('mi-select');
+    select.innerHTML = "";
+
+    for (const file of archivos) {
+      if (file.type === "dir") {
+        // Es carpeta: crear un optgroup
+        const optgroup = document.createElement("optgroup");
+        optgroup.label = file.name;
+
+        // Llamada extra para ver dentro de la carpeta
+        const subRes = await fetch(`/api/listar?path=${file.path}`);
+        const subArchivos = await subRes.json();
+
+        subArchivos.forEach(subFile => {
+          if (subFile.name.endsWith(".json")) {
+            const option = document.createElement("option");
+            option.value = subFile.download_url;
+            option.textContent = subFile.name.replace(".json", "");
+            optgroup.appendChild(option);
+          }
+        });
+
+        select.appendChild(optgroup);
+      } else if (file.name.endsWith(".json")) {
+        // Es archivo suelto en la raíz
+        const option = document.createElement("option");
+        option.value = file.download_url;
+        option.textContent = file.name.replace(".json", "");
+        select.appendChild(option);
+      }
+    }
+
+    // Evento para aplicar preset al seleccionar
+    select.addEventListener("change", async (e) => {
+      const url = e.target.value;
+      if (!url) return;
+      try {
+        const r = await fetch(url);
+        const json = await r.json();
+        console.log("Preset cargado:", json);
+        aplicarPreset(json);
+      } catch (err) {
+        console.error("Error al descargar preset:", err);
+      }
+    });
   } catch (error) {
     console.error('Error al obtener archivos desde la API:', error);
   }
 }
-
-function renderPresets(data) {
-  const select = document.getElementById("mi-select");
-  select.innerHTML = "";
-
-  data.forEach(grupo => {
-    if (grupo.carpeta) {
-      const optgroup = document.createElement("optgroup");
-      optgroup.label = grupo.carpeta;
-
-      grupo.contenido.forEach(file => {
-        const option = document.createElement("option");
-        option.value = file.download_url;
-        option.textContent = file.archivo.replace(".json", "");
-        optgroup.appendChild(option);
-      });
-
-      select.appendChild(optgroup);
-    } else {
-      const option = document.createElement("option");
-      option.value = grupo.download_url;
-      option.textContent = grupo.archivo.replace(".json", "");
-      select.appendChild(option);
-    }
-  });
-}
-
-// Llamar al cargar la página
-cargarListaPresets();
-
+//Como adaptaría esto
 function aplicarPreset(data) {
   console.log("Style cargado:", data);
   style = data;
