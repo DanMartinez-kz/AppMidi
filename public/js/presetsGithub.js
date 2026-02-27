@@ -1,29 +1,35 @@
-const url = 'https://api.github.com/repos/DanMartinez-kz/AppMidi/contents/presets/';
+// Cambia la URL para que apunte a tu nueva API interna
+const urlLocal = '/api/listar'; 
 
 async function cargarListaPresets() {
   try {
-    const response = await fetch(url);
-    const data = await response.json();
-console.log("Respuesta de GitHub:", data);
-    const archivosJson = data.filter(file => file.name.endsWith('.json'));
+    const response = await fetch(urlLocal);
+    const archivosJson = await response.json();
+    
+    if (archivosJson.error) throw new Error(archivosJson.error);
+
+    console.log("Presets recibidos:", archivosJson);
     const lista = document.getElementById('mi-lista');
     lista.innerHTML = "";
 
     archivosJson.forEach(file => {
       const li = document.createElement('li');
-      li.textContent = file.name;
-      li.addEventListener("click", () => {
-        fetch(file.download_url)
-          .then(r => r.json())
-          .then(json => {
-            console.log("Preset cargado:", json);
-            aplicarPreset(json);
-          });
+      li.textContent = file.name.replace('.json', ''); // Quita la extensión para que se vea limpio
+      
+      li.addEventListener("click", async () => {
+        try {
+          const r = await fetch(file.download_url);
+          const json = await r.json();
+          console.log("Preset cargado:", json);
+          aplicarPreset(json);
+        } catch (e) {
+          console.error("Error al descargar preset:", e);
+        }
       });
       lista.appendChild(li);
     });
   } catch (error) {
-    console.error('Error al obtener archivos:', error);
+    console.error('Error al obtener archivos desde la API:', error);
   }
 }
 
@@ -32,8 +38,6 @@ function aplicarPreset(data) {
   style = data;
   drawNotes();
 }
-
-cargarListaPresets();
 
 // Guardar preset (frontend)
 async function guardarPreset(nombre, contenidoJson) {

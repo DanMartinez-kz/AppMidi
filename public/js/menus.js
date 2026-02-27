@@ -1,5 +1,6 @@
 // Toggle menú Presets
 document.getElementById("toggle-explorador").addEventListener("click", () => {
+  cargarListaPresets();
   const menu = document.getElementById("menu-presets");
   menu.style.display = (menu.style.display === "none" || menu.style.display === "") ? "block" : "none";
 });
