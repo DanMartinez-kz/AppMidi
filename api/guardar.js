@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     const content = Buffer.from(JSON.stringify(contenidoJson, null, 2)).toString('base64');
 
     // 2. Subir a GitHub
-    const response = await fetch(`https://api.github.com{REPO}/contents/${PATH}`, {
+    const response = await fetch(`https://api.github.com/AppMidi/contents/${PATH}`, {
       method: "PUT",
       headers: {
         "Authorization": `Bearer ${TOKEN}`,
