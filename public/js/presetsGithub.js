@@ -3,7 +3,7 @@ const urlLocal = 'https://api.github.com/repos/DanMartinez-kz/AppMidi/contents/p
 
 async function cargarListaPresets() {
   try {
-    const response = await fetch('/api/listar'); // tu API interna
+    const response = await fetch(urlLocal); // tu API interna
     const archivos = await response.json();
 
     console.log("Respuesta completa:", archivos);
