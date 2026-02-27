@@ -1,4 +1,4 @@
-const url = 'https://api.github.com/repos/DanMartinez-kz/ArrMidi/contents/presets/';
+const url = 'https://api.github.com/repos/DanMartinez-kz/AppMidi/contents/presets/';
 
 async function cargarListaPresets() {
   try {
