@@ -71,3 +71,32 @@ document.getElementById("guardar").addEventListener("click", () => {
     guardarPreset(nombre, style);
   }
 });
+
+// Eliminar preset (frontend)
+async function eliminarPreset(nombre) {
+  const response = await fetch("/api/eliminar", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nombre })
+  });
+
+  const result = await response.json();
+  console.log(result);
+
+  // 🔄 Recargar lista después de eliminar
+  cargarListaPresets();
+}
+
+// Abrir el diálogo
+const dialogoE = document.getElementById("dialogo-eliminarpre");
+document.getElementById("abrir-dialogoE").addEventListener("click", () => {
+  dialogoE.showModal();
+});
+
+// Asociar el botón de eliminar
+document.getElementById("eliminar-pre").addEventListener("click", () => {
+  const nombre = document.getElementById("nom-eliminarpre").value.trim();
+  if (nombre) {
+    eliminarPreset(nombre);
+  }
+});

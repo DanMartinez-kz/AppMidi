@@ -33,6 +33,7 @@
       <ul id="mi-lista"></ul>
     	<br>
     	<button id="abrir-dialogo">Guardar preset</button>
+    <button id="abrir-dialogoE">Eliminar preset</button>
     </div>
   </div>
 
@@ -94,6 +95,18 @@
     <menu>
       <button id="cancelar" value="cancel">Cancelar</button>
       <button id="guardar" value="default">Guardar</button>
+    </menu>
+  </form>
+</dialog>
+		
+		<!-- Dialog modal -->
+<dialog id="dialogo-eliminarpre">
+  <form method="dialog">
+    <label for="nombre-preset">Nombre del preset:</label>
+    <input type="text" id="nom-eliminarpre" required>
+    <menu>
+      <button id="cancelar" value="cancel">Cancelar</button>
+      <button id="eliminar-pre" value="default">Eliminar</button>
     </menu>
   </form>
 </dialog>
