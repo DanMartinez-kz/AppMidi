@@ -1,32 +1,56 @@
-// Cambia la URL para que apunte a tu nueva API interna
-const urlLocal = '/api/listar'; 
-
 async function cargarListaPresets() {
   try {
-    const response = await fetch(urlLocal);
-    const archivosJson = await response.json();
-    
-    if (archivosJson.error) throw new Error(archivosJson.error);
+    const response = await fetch('/api/listar');
+    const data = await response.json();
 
-    console.log("Presets recibidos:", archivosJson);
+    if (data.error) throw new Error(data.error);
+
+    console.log("Presets recibidos:", data);
     const lista = document.getElementById('mi-lista');
     lista.innerHTML = "";
 
-    archivosJson.forEach(file => {
-      const li = document.createElement('li');
-      li.textContent = file.name.replace('.json', ''); // Quita la extensión para que se vea limpio
-      
-      li.addEventListener("click", async () => {
-        try {
-          const r = await fetch(file.download_url);
-          const json = await r.json();
-          console.log("Preset cargado:", json);
-          aplicarPreset(json);
-        } catch (e) {
-          console.error("Error al descargar preset:", e);
-        }
-      });
-      lista.appendChild(li);
+    data.forEach(grupo => {
+      if (grupo.carpeta) {
+        // Crear un <li> para la carpeta
+        const carpetaLi = document.createElement('li');
+        carpetaLi.textContent = grupo.carpeta;
+        carpetaLi.style.fontWeight = "bold";
+
+        // Crear una sublista para los presets dentro de la carpeta
+        const subLista = document.createElement('ul');
+        grupo.contenido.forEach(file => {
+          const li = document.createElement('li');
+          li.textContent = file.archivo.replace('.json', '');
+          li.addEventListener("click", async () => {
+            try {
+              const r = await fetch(file.download_url);
+              const json = await r.json();
+              console.log("Preset cargado:", json);
+              aplicarPreset(json);
+            } catch (e) {
+              console.error("Error al descargar preset:", e);
+            }
+          });
+          subLista.appendChild(li);
+        });
+
+        carpetaLi.appendChild(subLista);
+        lista.appendChild(carpetaLi);
+      } else {
+        // Archivos sueltos en la raíz
+        const li = document.createElement('li');
+        li.textContent = grupo.archivo.replace('.json', '');
+        li.addEventListener("click", async () => {
+          try {
+            const r = await fetch(grupo.download_url);
+            const json = await r.json();
+            aplicarPreset(json);
+          } catch (e) {
+            console.error("Error al descargar preset:", e);
+          }
+        });
+        lista.appendChild(li);
+      }
     });
   } catch (error) {
     console.error('Error al obtener archivos desde la API:', error);
