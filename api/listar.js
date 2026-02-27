@@ -1,5 +1,5 @@
 async function listarContenido(repo, path, token) {
-  const response = await fetch(`https://api.github.com/repos/DanMartinez-kz/AppiMidi/contents/${path}`, {
+  const response = await fetch(`https://api.github.com/repos/DanMartinez-kz/AppMidi/contents/${path}`, {
     headers: {
       "Authorization": `Bearer ${token}`,
       "Accept": "application/vnd.github.v3+json"
